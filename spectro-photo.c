@@ -15,7 +15,6 @@ void column_to_PCM(FILE *sound_out, float *column_intensity, int x, int y, int s
 			float freq = top_freq - (y_slice * j);
 			sample += (column_intensity[j] * (sin(2 * M_PI * freq *  i / sample_rate) * envelope_multiplier)) / x;
 		}
-		//printf("%f\n", sample);
 		fwrite(&sample, sizeof(float), 1, sound_out);
 	}
 }
@@ -45,8 +44,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Couldn't load image.\n"); 
 		return (-1);
 	}
-
-	//printf("%d %d %d\n", x, y, n);
 
 	FILE *file = fopen(outputFile, "wb");
 
