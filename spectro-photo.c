@@ -4,23 +4,23 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-void column_to_PCM(FILE *sound_out, float *column_intensity, int x, int y, int sample_rate) {
+void column_to_PCM(FILE *sound_out, float *column_intensity, int y, int sample_rate) {
 	float top_freq = (float) sample_rate / 2;
 	float y_slice =  top_freq / y;
-	int column_length = (sample_rate / 5) / 5;
+	int column_width = sample_rate / 25;
 	float sample = 0;
-	for (int i = 0; i < column_length; i++) {
-		float envelope_multiplier = sin(M_PI * ((float) i / (float) column_length));
+	for (int i = 0; i < column_width; i++) {
+		float envelope_multiplier = sin(M_PI * ((float) i /  column_width));
 		for (int j = 0; j < y; j++) {
 			float freq = top_freq - (y_slice * j);
-			sample += (column_intensity[j] * (sin(2 * M_PI * freq *  i / sample_rate) * envelope_multiplier)) / x;
+			sample += (column_intensity[j] * (sin(2 * M_PI * freq *  i / sample_rate) * envelope_multiplier)) / y;
 		}
 		fwrite(&sample, sizeof(float), 1, sound_out);
 	}
 }
 
 int get_point_index(int this_x, int this_y, int x, int n) {
-	return (this_y * (x * n)) + this_x;
+	return (this_y * (x * n)) + this_x * n;
 }
 
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 			float this_intensity = get_pixel_intensity(&data[this_index], 1);
 			this_column_intensity[this_y] = this_intensity;
 		}
-		column_to_PCM(file, this_column_intensity, x, y, 48000);
+		column_to_PCM(file, this_column_intensity, y, 48000);
 	}
 
 	fclose(file);
