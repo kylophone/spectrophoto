@@ -39,10 +39,15 @@ int main(int argc, char **argv) {
 	const char *outputFile = argv[2];
 	int x,y,n;
 	unsigned char *data = stbi_load(inputFile, &x, &y, &n, 1);
+	
+	if (argc != 3) {
+		fprintf(stderr, "Usage: spectrophoto <inputfile> <outputfile>.\n");
+		return(-1);
+	}
 
 	if (!data) {
 		fprintf(stderr, "Couldn't load image.\n"); 
-		return (-1);
+		return(-1);
 	}
 
 	FILE *file = fopen(outputFile, "wb");
