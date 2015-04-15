@@ -4,7 +4,7 @@ Turns an image into an audio file. Image is visible on the spectrogram.
 ##Building
 ```bash
 cd spectro-photo
-gcc spectrophoto.c -o spectrophoto
+gcc spectro-photo.c -o spectrophoto
 ```
 ##Usage
 ```
