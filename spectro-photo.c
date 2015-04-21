@@ -51,6 +51,8 @@ int main(int argc, char **argv) {
 	}
 
 	FILE *file = fopen(outputFile, "wb");
+	
+	if (file == NULL) {return 1}
 
 	for (int this_x = 0; this_x < x; this_x++) {
 		float this_column_intensity[y];
