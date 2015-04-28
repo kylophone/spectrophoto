@@ -3,6 +3,7 @@ Turns an image into an audio file. Image is visible on the spectrogram.
 <img src = "face.png"/>
 ##Building
 ```bash
+git clone https://github.com/kylophone/spectro-photo
 cd spectro-photo
 gcc ./spectro-photo.c -o spectrophoto
 ```
