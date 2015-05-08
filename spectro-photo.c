@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
 	FILE *file = fopen(outputFile, "wb");
 	
-	if (file == NULL) {
+	if (!file) {
 		fprintf(stderr, "Couldn't open file.\n"); 
 		return(-1);
 	}
