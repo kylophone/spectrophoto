@@ -4,6 +4,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#ifndef M_PI
+  #define M_PI 3.14159265358979323846
+#endif
+
 void column_to_PCM(FILE *sound_out, float *column_intensity, int y, int sample_rate) {
 	float top_freq = (float) sample_rate / 2;
 	float y_slice =  top_freq / y;
