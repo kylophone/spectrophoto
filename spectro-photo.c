@@ -12,15 +12,18 @@ void column_to_PCM(FILE *sound_out, float *column_intensity, int y, int sample_r
 	float top_freq = (float) sample_rate / 2;
 	float y_slice =  top_freq / y;
 	int column_width = sample_rate / 25;
-	float sample = 0;
+	float buf_out[column_width];
+    float sample = 0;
 	for (int i = 0; i < column_width; i++) {
 		float envelope_multiplier = sin(M_PI * ((float) i /  column_width));
 		for (int j = 0; j < y; j++) {
 			float freq = top_freq - (y_slice * j);
 			sample += (column_intensity[j] * (sin(2 * M_PI * freq *  ((float) i / sample_rate)) * envelope_multiplier)) / y;
-		}
-		fwrite(&sample, sizeof(float), 1, sound_out);
-	}
+            sample *= .99; // headroom
+        }
+		buf_out[i] = sample;
+    }
+    fwrite(&buf_out, sizeof(float) * column_width, 1, sound_out);
 }
 
 int get_point_index(int this_x, int this_y, int x, int n) {
