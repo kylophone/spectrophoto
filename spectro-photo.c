@@ -5,7 +5,7 @@
 #include "stb_image.h"
 
 #ifndef M_PI
-    #define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
 void column_to_PCM(FILE *sound_out, float *column_intensity, int y, int sample_rate) {
