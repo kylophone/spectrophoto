@@ -19,8 +19,8 @@ void column_to_PCM(FILE *sound_out, float *column_intensity, int y, int sample_r
         for (int j = 0; j < y; j++) {
             float freq = top_freq - (y_slice * j);
             sample += (column_intensity[j] * (sin(2 * M_PI * freq *  ((float) i / sample_rate)) * envelope_multiplier)) / y;
-            sample *= .99;
         }
+        sample *= .95;
         buf_out[i] = sample;
     }
     fwrite(buf_out, sizeof(float) * column_width, 1, sound_out);
