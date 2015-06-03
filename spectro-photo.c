@@ -39,7 +39,6 @@ float get_pixel_intensity(unsigned char *data, int n) {
 
 
 int main(int argc, char **argv) {
-	
 	if (argc != 3) {
 		fprintf(stderr, "Usage: spectrophoto <inputfile> <outputfile>.\n");
 		return(-1);
