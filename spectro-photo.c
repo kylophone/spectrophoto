@@ -12,7 +12,7 @@ void column_to_PCM(FILE *sound_out, float *column_intensity, int y, int sample_r
     float top_freq = (float) sample_rate / 2;
     float y_slice =  top_freq / y;
     int column_width = sample_rate / 25;
-    float buf_out[column_width];
+    float *buf_out = malloc(sizeof(double) * column_width);
     float sample = 0;
     for (int i = 0; i < column_width; i++) {
         float envelope_multiplier = sin(M_PI * ((float) i /  column_width));
@@ -23,7 +23,8 @@ void column_to_PCM(FILE *sound_out, float *column_intensity, int y, int sample_r
         }
         buf_out[i] = sample;
     }
-    fwrite(&buf_out, sizeof(float) * column_width, 1, sound_out);
+    fwrite(buf_out, sizeof(float) * column_width, 1, sound_out);
+    free(buf_out);
 }
 
 int get_point_index(int this_x, int this_y, int x, int n) {
