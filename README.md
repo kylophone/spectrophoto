@@ -9,7 +9,7 @@ gcc ./spectro-photo.c -o spectrophoto -std=c99 -lm -O3
 ```
 ##Usage
 ```
-spectrophoto <inputfile> <outputfile>
+spectrophoto in.jpg out.raw
 ```
 ##Output
 This will generate a 48k/32-bit floating point raw PCM file. You can listen to it with SoX like this:
