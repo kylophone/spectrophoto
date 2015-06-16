@@ -84,5 +84,5 @@ int main(int argc, char **argv)
   free(this_column_intensity);
   fclose(file);
   stbi_image_free(data);
-  return 0;
+  return(0);
 }
