@@ -1,4 +1,4 @@
-# spectro-photo
+# spectrophoto
 Turns an image into an audio file. Image is visible on the spectrogram. 
 <img src = "face.png"/>
 ##Building
