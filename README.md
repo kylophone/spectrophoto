@@ -5,7 +5,7 @@ Turns an image into an audio file. Image is visible on the spectrogram.
 ```bash
 git clone https://github.com/kylophone/spectro-photo
 cd spectro-photo
-gcc ./spectro-photo.c -o spectrophoto -std=c99 -lm -O3
+gcc ./spectrophoto.c -o spectrophoto -std=c99 -lm -O3 -Wall
 ```
 ##Usage
 ```
