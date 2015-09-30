@@ -46,7 +46,7 @@ float get_pixel_intensity(unsigned char *data, int n)
 int main(int argc, char **argv)
 {
   if (argc != 3) {
-    fprintf(stderr, "Usage: spectrophoto <inputfile> <outputfile>\n");
+    fprintf(stderr, "Usage: %s <inputfile> <outputfile>\n", argv[0]);
     fprintf(stderr, "https://github.com/kylophone/spectrophoto\n");
     return(-1);
   }
