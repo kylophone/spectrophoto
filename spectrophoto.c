@@ -48,7 +48,7 @@ int main(int argc, char **argv)
   if (argc != 3) {
     fprintf(stderr, "Usage: %s <inputfile> <outputfile>\n", argv[0]);
     fprintf(stderr, "https://github.com/kylophone/spectrophoto\n");
-    return(-1);
+    return -1;
   }
 
   int x,y,n;
@@ -56,14 +56,14 @@ int main(int argc, char **argv)
   unsigned char *data = stbi_load(inputFile, &x, &y, &n, 1);
   if (!data) {
     fprintf(stderr, "Couldn't load image: %s\n", inputFile); 
-    return(-1);
+    return -1;
   }
 
   const char *outputFile = argv[2];
   FILE *file = fopen(outputFile, "wb");
   if (!file) {
     fprintf(stderr, "Couldn't open file: %s\n", outputFile); 
-    return(-1);
+    return -1;
   }
 
   float *this_column_intensity = malloc(sizeof(float) * y);
@@ -79,5 +79,5 @@ int main(int argc, char **argv)
   free(this_column_intensity);
   fclose(file);
   stbi_image_free(data);
-  return(0);
+  return 0;
 }
