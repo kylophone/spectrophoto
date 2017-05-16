@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -8,36 +9,31 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-void column_to_PCM(FILE *sound_out, float *column_intensity, int y, int sample_rate)
+#define SAMPLE_RATE 48000
+
+void column_to_PCM(float *buf, float *column, int nb_samples, int height, float **sin_lut)
 {
-  float top_freq = (float) sample_rate / 2;
-  float y_slice =  top_freq / y;
-  int column_width = sample_rate / 25;
-  float *buf_out = malloc(sizeof(double) * column_width);
-  float sample = 0;
-  for (int i = 0; i < column_width; i++) {
-    float envelope_multiplier = sin(M_PI * ((float) i /  column_width));
-    for (int j = 0; j < y; j++) {
-      float freq = top_freq - (y_slice * j);
-      sample += (column_intensity[j] * (sin(2 * M_PI * freq *  ((float) i / sample_rate)) * envelope_multiplier)) / y;
+  float sample = 0.;
+
+  for (int i = 0; i < nb_samples; i++) {
+    for (int j = 0; j < height; j++) {
+      sample += (column[j] * sin_lut[j][i]) / height;
     }
-    sample *= .95;
-    buf_out[i] = sample;
+    sample *= .90;
+    buf[i] = sample;
   }
-  fwrite(buf_out, sizeof(float) * column_width, 1, sound_out);
-  free(buf_out);
 }
 
-int get_point_index(int this_x, int this_y, int x, int n)
+int get_point_index(int i, int j, int x, int n)
 {
-  return (this_y * (x * n)) + this_x * n;
+  return (j * (x * n)) + i * n;
 }
 
-float get_pixel_intensity(unsigned char *data, int n)
+float get_pixel_intensity(unsigned char *img, int n)
 {
   int RGB_sum = 0;
   for (int i = 0; i < n; i++) {
-    RGB_sum += data[i];
+    RGB_sum += img[i];
   }
   float intensity = ((float) RGB_sum / n) / 255;
   return intensity;
@@ -45,39 +41,87 @@ float get_pixel_intensity(unsigned char *data, int n)
 
 int main(int argc, char **argv)
 {
-  if (argc != 3) {
-    fprintf(stderr, "Usage: %s <inputfile> <outputfile>\n", argv[0]);
-    fprintf(stderr, "https://github.com/kylophone/spectrophoto\n");
-    return -1;
+  if (argc != 4) {
+    fprintf(stderr, "Usage: %s <inputfile> <outputfile> <duration>\n", argv[0]);
+    return 1;
   }
 
   int x,y,n;
-  const char *inputFile = argv[1];
-  unsigned char *data = stbi_load(inputFile, &x, &y, &n, 1);
-  if (!data) {
-    fprintf(stderr, "Couldn't load image: %s\n", inputFile); 
-    return -1;
+  const char *input_file = argv[1];
+  unsigned char *img = stbi_load(input_file, &x, &y, &n, 1);
+  if (!img) {
+    fprintf(stderr, "Couldn't load image: %s\n", input_file);
+    return 1;
   }
 
-  const char *outputFile = argv[2];
-  FILE *file = fopen(outputFile, "wb");
-  if (!file) {
-    fprintf(stderr, "Couldn't open file: %s\n", outputFile); 
-    return -1;
+  int duration = atoi(argv[3]);
+  int nb_samples = (duration * SAMPLE_RATE) / x;
+  if (nb_samples <= 0) {
+    fprintf(stderr, "Duration is too low: %d\n", duration);
+    return 1;
   }
 
-  float *this_column_intensity = malloc(sizeof(float) * y);
-  for (int this_x = 0; this_x < x; this_x++) {
-    for (int this_y = 0; this_y < y; this_y++) {
-      int this_index = get_point_index(this_x, this_y, x, 1);
-      float this_intensity = get_pixel_intensity(&data[this_index], 1);
-      this_column_intensity[this_y] = this_intensity;
+  const char *output_file = argv[2];
+  FILE *pcm = fopen(output_file, "wb");
+  if (!pcm) {
+    fprintf(stderr, "Couldn't open file: %s\n", output_file);
+    return 1;
+  }
+
+  float *column = malloc(sizeof(float) * y);
+  if (!column) {
+    fprintf(stderr, "Couldn't allocate buffer.\n");
+    return 1;
+  }
+
+  float *buf = malloc(sizeof(float) * nb_samples);
+  if (!buf) {
+    fprintf(stderr, "Couldn't allocate buffer.\n");
+    return 1;
+  }
+
+  float **sin_lut = malloc(sizeof(float*) * y);
+  if (!sin_lut) {
+    fprintf(stderr, "Couldn't allocate buffer.\n");
+    return 1;
+  }
+
+  for (int i = 0; i < y; i++) {
+    sin_lut[i] = malloc(sizeof(float) * nb_samples);
+    if (!sin_lut[i]) {
+      fprintf(stderr, "Couldn't allocate buffer.\n");
+      return 1;
     }
-    column_to_PCM(file, this_column_intensity, y, 48000);
   }
 
-  free(this_column_intensity);
-  fclose(file);
-  stbi_image_free(data);
+  float nyquist = (float) SAMPLE_RATE / 2;
+  float hz_step = nyquist / y;
+  for (int i = 0; i < y; i++) {
+    for (int j = 0; j < nb_samples; j++) {
+      float freq = nyquist - (hz_step * i);
+      float env = sin(2 * M_PI * ((float) j / nb_samples));
+      sin_lut[i][j] = env * sin(2 * M_PI * freq * ((float) j / SAMPLE_RATE));
+    }
+  }
+
+  for (int i = 0; i < x; i++) {
+    for (int j = 0; j < y; j++) {
+      int index = get_point_index(i, j, x, 1);
+      float intensity = get_pixel_intensity(&img[index], 1);
+      column[j] = intensity;
+    }
+    column_to_PCM(buf, column, nb_samples, y, sin_lut);
+    fwrite(buf, sizeof(float) * nb_samples, 1, pcm);
+  }
+
+  for (int i = 0; i < y; i++)
+    free(sin_lut[i]);
+  free(sin_lut);
+
+  free(buf);
+  free(column);
+  stbi_image_free(img);
+
+  fclose(pcm);
   return 0;
 }
